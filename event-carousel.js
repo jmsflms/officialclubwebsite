@@ -60,4 +60,20 @@
       move(event.key === "ArrowRight" ? 1 : -1);
     }
   });
+  // Desktop automatically advances one tablet at a time; mobile keeps swipe controls.
+  const desktop = window.matchMedia("(min-width: 761px)");
+  const carousel = grid.closest(".events");
+  let resumeAfter = 0;
+  const pauseAfterInteraction = () => { resumeAfter = Date.now() + 7000; };
+  for (const eventName of ["pointerdown", "wheel", "keydown"]) {
+    carousel.addEventListener(eventName, pauseAfterInteraction, {passive: true});
+  }
+  window.setInterval(() => {
+    if (!desktop.matches || reduced.matches || document.hidden) return;
+    if (Date.now() < resumeAfter || carousel.matches(":hover") || carousel.matches(":focus-within")) return;
+    const bounds = carousel.getBoundingClientRect();
+    if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
+    move(1);
+  }, 3500);
+
 })();
