@@ -43,13 +43,50 @@
     grid.append(card);
   }
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const desktop = window.matchMedia("(min-width: 761px)");
+  const carousel = grid.closest(".events");
+  const originals = [...grid.children];
+  if (!originals.length) return;
+  const clone = card => {
+    const copy = card.cloneNode(true);
+    copy.setAttribute("aria-hidden", "true");
+    copy.querySelectorAll("a,button").forEach(control => control.tabIndex = -1);
+    return copy;
+  };
+  // Each repeated group is wider than the desktop viewport, so wrapping is invisible.
+  const repeats = Math.max(1, Math.ceil(1000 / (originals.length * 240)));
+  for (let repeat = 1; repeat < repeats; repeat++) {
+    originals.forEach(card => grid.append(clone(card)));
+  }
+  const middle = [...grid.children];
+  const before = document.createDocumentFragment();
+  middle.forEach(card => before.append(clone(card)));
+  grid.prepend(before);
+  const after = middle.map(clone);
+  after.forEach(card => grid.append(card));
+  grid.style.scrollSnapType = "none";
+  let cycle = 0;
+  let position = 0;
+  let resumeAfter = 0;
+  const measure = () => {
+    cycle = after[0].getBoundingClientRect().left - middle[0].getBoundingClientRect().left;
+    position = cycle;
+    grid.scrollLeft = position;
+  };
+  const normalise = value => {
+    if (!cycle) return value;
+    return cycle + ((value - cycle) % cycle + cycle) % cycle;
+  };
+  measure();
+  window.addEventListener("resize", measure);
+  const pauseAfterInteraction = () => { resumeAfter = Date.now() + 7000; };
+  for (const eventName of ["pointerdown", "wheel", "keydown"]) {
+    carousel.addEventListener(eventName, pauseAfterInteraction, {passive: true});
+  }
   const move = direction => {
-    const card = grid.firstElementChild;
-    if (!card) return;
-    const step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(grid).gap);
-    const max = grid.scrollWidth - grid.clientWidth;
-    const next = grid.scrollLeft + direction * step;
-    grid.scrollTo({left: next > max + 2 ? 0 : next < -2 ? max : next, behavior: reduced.matches ? "instant" : "smooth"});
+    pauseAfterInteraction();
+    const step = middle[0].getBoundingClientRect().width + parseFloat(getComputedStyle(grid).gap);
+    grid.scrollTo({left: grid.scrollLeft + direction * step, behavior: reduced.matches ? "instant" : "smooth"});
   };
   document.getElementById("events-prev").addEventListener("click", () => move(-1));
   document.getElementById("events-next").addEventListener("click", () => move(1));
@@ -60,20 +97,30 @@
       move(event.key === "ArrowRight" ? 1 : -1);
     }
   });
-  // Desktop automatically advances one tablet at a time; mobile keeps swipe controls.
-  const desktop = window.matchMedia("(min-width: 761px)");
-  const carousel = grid.closest(".events");
-  let resumeAfter = 0;
-  const pauseAfterInteraction = () => { resumeAfter = Date.now() + 7000; };
-  for (const eventName of ["pointerdown", "wheel", "keydown"]) {
-    carousel.addEventListener(eventName, pauseAfterInteraction, {passive: true});
-  }
-  window.setInterval(() => {
-    if (!desktop.matches || reduced.matches || document.hidden) return;
-    if (Date.now() < resumeAfter || carousel.matches(":hover") || carousel.matches(":focus-within")) return;
+  // Restore the matching middle group after a manual swipe or arrow movement.
+  let scrollTimer;
+  grid.addEventListener("scroll", () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      position = normalise(grid.scrollLeft);
+      if (Math.abs(position - grid.scrollLeft) > 1) grid.scrollLeft = position;
+    }, 180);
+  }, {passive: true});
+  let previousTime;
+  const animate = time => {
+    const elapsed = previousTime === undefined ? 0 : Math.min(time - previousTime, 50);
+    previousTime = time;
     const bounds = carousel.getBoundingClientRect();
-    if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
-    move(1);
-  }, 3500);
-
+    const paused = !desktop.matches || reduced.matches || document.hidden ||
+      Date.now() < resumeAfter || carousel.matches(":hover") ||
+      carousel.matches(":focus-within") || bounds.bottom <= 0 || bounds.top >= window.innerHeight;
+    if (paused) {
+      position = grid.scrollLeft;
+    } else {
+      position = normalise(position + 24 * elapsed / 1000);
+      grid.scrollLeft = position;
+    }
+    requestAnimationFrame(animate);
+  };
+  requestAnimationFrame(animate);
 })();
