@@ -30,7 +30,7 @@
     #changing-word{transform:none!important}
     .word-focus{color:#ff2d24}
     .lower{display:block;margin-top:14px}
-    .details{white-space:nowrap;margin:0;font-size:clamp(.75rem,1.25vw,1rem);line-height:1.55}
+    .details{max-width:850px;white-space:normal;margin:0;font-size:clamp(.875rem,1.25vw,1.125rem);line-height:1.55}
     .secondary{min-width:0;max-width:520px;margin-top:30px}
     .contact,.instagram{margin:0 0 18px;font-size:clamp(.72rem,1.1vw,.9rem);line-height:1.5}
     .email{white-space:nowrap}
@@ -93,7 +93,7 @@
       <h1>The Underground Rebel <span id="changing-word">Bingo</span> Club</h1>
 
       <div class="lower">
-        <div class="event-column"><p class="details">Venue 1 · Opening Autumn 2026 · 3am License · <a href="https://maps.app.goo.gl/NevSjaJQXdpViCkWA" target="_blank" rel="noopener">Central London</a></p></div>
+        <div class="event-column"><p class="details">Launching 23 October: a brand new concept venue in London, home to <strong>visual, immersive, interactive shows designed to hyperstimulate the senses.</strong> Inside a former cinema, expect an experience unlike anything you’ve tried before. Choose an experience and find a date — or choose a date and discover your experience.</p></div>
 
 
       </div>
@@ -149,15 +149,13 @@
     },500);
 
 
-    // Keep both introductory lines inside the screen, including the longest changing name.
+    // Keep the headline inside the screen, including the longest changing name.
     const heading = document.querySelector("h1");
-    const details = document.querySelector(".details");
     const measuringCanvas = document.createElement("canvas");
     const measuringContext = measuringCanvas.getContext("2d");
     function fitIntroLines() {
       for (const [element, preferred, candidates] of [
-        [heading, Math.min(42, Math.max(18, innerWidth * .03)), words.map(word => "The Underground Rebel " + word + " Club")],
-        [details, Math.min(16, Math.max(12, innerWidth * .0125)), [details.textContent]]
+        [heading, Math.min(42, Math.max(18, innerWidth * .03)), words.map(word => "The Underground Rebel " + word + " Club")]
       ]) {
         const style = getComputedStyle(element);
         measuringContext.font = style.fontWeight + " " + preferred + "px " + style.fontFamily;
