@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Rebel Bingo | Camden Town 2026</title>
   <meta name="description" content="The Underground Rebel Bingo Club. Opening in Camden Town in 2026.">
@@ -54,16 +54,28 @@
       .signup button{height:38px}.email{white-space:normal}
     }
     @media(prefers-reduced-motion:reduce){.tab-strip a{animation:none}.backdrop{display:none}}
+
+    .events{position:relative;z-index:3;width:100%;margin:34px 0 0}
+    .event-controls{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
+    .event-arrow{width:44px;height:44px;border:1px solid #111;background:rgba(244,240,231,.8);color:#111;font:inherit;font-size:26px;cursor:pointer}
+    .event-grid{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:10px 0 20px}
+    .event-card{display:flex;flex-direction:column;align-items:stretch;flex:0 0 75%;min-width:0;scroll-snap-align:start}
+    .event-img{display:block;width:100%;height:auto;border-radius:22px;object-fit:contain;box-shadow:0 16px 32px rgba(0,0,0,.45)}
+    .event-name{font-size:.8rem;line-height:1.4;margin:12px 0 8px}
+    .event-action{display:flex;justify-content:center;align-items:center;min-height:48px;padding:12px 16px;border:1px solid #111;background:#eeff00;color:#111;font:inherit;font-size:.8rem;text-decoration:none;text-align:center}
+    .event-action:hover{background:#ff862b}
+    .event-action:focus-visible,.event-arrow:focus-visible{outline:3px solid #ff2d24;outline-offset:3px}
+    .event-action[disabled]{background:#f4f0e7;opacity:.75}
+    .event-note{font-size:.7rem;line-height:1.5;margin:8px 0}
+    @media(max-width:760px){.content{display:flex;flex-direction:column}.lower{display:contents}.event-column{margin-top:38px;order:1}.events{order:2}.secondary{order:3;margin-top:44px}h1{order:0}}
+    @media(min-width:761px){.event-card{flex-basis:calc((100% - 44px)/3)}}
+    @media(min-width:1200px){.event-card{flex-basis:calc((100% - 66px)/4)}}
   </style>
 </head>
 <body>
   <nav class="tab-strip" aria-label="Rebel Bingo sections">
     <a class="tab-home active" aria-current="page" href="index.html">Home</a>
-    <a class="tab-announcements" href="announcements.html">Announcements</a>
     <a class="tab-venue" href="venue.html">Venue Info</a>
-    <a class="tab-partnerships" href="partnerships.html">Festivals &amp; Partnerships</a>
-    <a class="tab-party" href="party-schedule.html">Party Schedule</a>
-    <a class="tab-plan" href="plan.html">The Plan</a>
     <a class="tab-instagram" href="https://www.instagram.com/rebel_bingo/" target="_blank" rel="noopener">Instagram</a>
   </nav>
   <main class="frame">
@@ -74,7 +86,7 @@
       <h1><span class="headline-line">The</span><span class="headline-line">Underground</span><span class="headline-line">Rebel</span><span class="headline-line" id="changing-word">Bingo</span><span class="headline-line">Club</span></h1>
 
       <div class="lower">
-        <p class="details">Venue 1<br>Opening Autumn 2026<br>3am License<br><a href="https://maps.app.goo.gl/NevSjaJQXdpViCkWA" target="_blank" rel="noopener">Central London</a></p>
+        <div class="event-column"><p class="details">Venue 1<br>Opening Autumn 2026<br>3am License<br><a href="https://maps.app.goo.gl/NevSjaJQXdpViCkWA" target="_blank" rel="noopener">Central London</a></p></div>
 
         <div class="secondary">
           <button class="sound" id="sound" type="button">SOUND ON</button>
@@ -87,16 +99,26 @@
               <input id="email" name="email" type="email" placeholder="type email here for more info" autocomplete="email" required>
               <button type="submit">sign up</button>
             </div>
-            <p class="legal">By signing up, you agree to receive news and updates from Rebel Bingo. You can unsubscribe at any time. See the <a href="announcements.html">announcements page</a> for the communications schedule.</p>
+            <p class="legal">By signing up, you agree to receive news and updates from Rebel Bingo. You can unsubscribe at any time.</p>
             <p class="status" aria-live="polite"></p>
           </form>
 
           <p class="official">© 2026 Rebel Bingo. All rights reserved.<a href="privacy.html">Privacy Policy</a></p>
         </div>
       </div>
+
+      <section class="events" aria-label="Events">
+        <div class="event-controls">
+          <button type="button" class="event-arrow" id="events-prev" aria-label="Previous events">‹</button>
+          <button type="button" class="event-arrow" id="events-next" aria-label="Next events">›</button>
+        </div>
+        <div class="event-grid" id="events-grid" tabindex="0" aria-label="Scroll through events"></div>
+      </section>
     </section>
   </main>
 
+  <script src="events.js"></script>
+  <script src="event-carousel.js"></script>
   <script>
     const words=["Madonna","Jungle","Botox","Tokyo","Kylie","Psychedelic","Cans","Midnight","Take That","Latex","Margate","Therapy","Cowgirl","80s","Electric","Friends","Britney","Crocs","Ibiza","Hallucination","Cocktails","Cowboy","Romance","DNB","Halloween","Lovers","Eurovision","Leopard","Tuesday","Aperol","Fashion","End of the World","Glitter","Future","Karaoke","Kink"];
     const changingWord=document.querySelector("#changing-word");
